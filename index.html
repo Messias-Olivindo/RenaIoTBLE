@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reniot - Controle de Pista</title>
+  <style>
+    body {
+      background: #0d1117;
+      color: #e6edf3;
+      font-family: "Segoe UI", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #f9d314;
+      margin-bottom: 1.5rem;
+      letter-spacing: 1px;
+    }
+
+    .btn-container {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    button {
+      background: #f9d314;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.4rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover {
+      background: #f9d314;
+      transform: scale(1.05);
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    footer {
+      position: absolute;
+      bottom: 10px;
+      font-size: 0.9rem;
+      color: #8b949e;
+    }
+  </style>
+</head>
+<body>
+  <h1>Reniot - Controle de Pista</h1>
+  <div class="btn-container">
+    <button onclick="sendTrackType('asfalto')">Asfalto</button>
+    <button onclick="sendTrackType('terra')">Terra</button>
+    <button onclick="sendTrackType('cascalho')">Cascalho</button>
+  </div>
+
+  <footer>© 2025 Reniot</footer>
+
+  <script>
+    async function sendTrackType(track) {
+      try {
+        console.log("Procurando ESP32 BLE...");
+        const device = await navigator.bluetooth.requestDevice({
+        filters: [{ services: ['0000181a-0000-1000-8000-00805f9b34fb'] }]
+        });
+
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService('0000181a-0000-1000-8000-00805f9b34fb');
+        const characteristic = await service.getCharacteristic('00002a57-0000-1000-8000-00805f9b34fb');
+        const encoder = new TextEncoder();
+        await characteristic.writeValue(encoder.encode(track));
+        alert(`Tipo de pista enviado: ${track}`);
+      } catch (error) {
+        console.error("Erro:", error);
+        alert("Falha ao enviar o tipo de pista");
+      }
+    }
+  </script>
+</body>
+</html>
